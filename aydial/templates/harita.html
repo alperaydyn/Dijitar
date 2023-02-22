@@ -1,0 +1,910 @@
+
+<!DOCTYPE HTML>
+<html lang="en-US">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=0.4, user-scalable=yes" >
+        <title>Bitkisel Üretim Tahmin Uygulaması</title>
+
+        <link rel="stylesheet" type="text/css" href="static/css/normalize.css">
+        <link rel="stylesheet" type="text/css" href="static/css/jquery.qtip.min.css">
+        <link rel="stylesheet" type="text/css" href="static/css/bootstrap.min.css" >
+        <link rel="stylesheet" type="text/css" href="static/css/style1.css" >
+
+        <script type="text/javascript" src="static/js/jquery-1.8.0.min.js"></script>
+        <script type="text/javascript" src="static/js/raphael-min.js"></script>
+        <script type="text/javascript" src="static/js/paths.js"></script>
+        <script type="text/javascript" src="static/js/turkiye.js?v=123"></script>
+        <script type="text/javascript" src="static/js/jquery.qtip.min.js"></script>
+        <script type="text/javascript" src="static/js/bootstrap.bundle.min.js"></script>
+    </head>
+
+    <body>
+        <section id="hero" class="d-flex">
+            <div class="container position-relative">
+                <!-- main caption -->
+                <div class="row justify-content-center mt-3" >
+                    <div class="col-xl-7 col-md-12 text-center">
+                    <h1>İller Bazında Bitkisel Üretim Hacimleri </h1>
+                     <h2>ve Verimlilik Tahminler</h2>
+                    </div>
+                    <a href='/dijitar/aciklama'>Açıklamalar</a>
+                </div>
+
+                <!-- map and title -->
+                <hr/>
+                <div class="row"> <!-- visitor counter -->
+                    <div class="col-12">
+                        <span style="float:right; font-size:8pt; font-decoration:italic">ziyaretçi satısı: {{ counter }}</span>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-xl-9 col-lg-12" style="background:rgba(50, 50, 50, 0.05)">
+                        <center>
+                        <div id="div_title" class="text-center">&nbsp;</div>
+                        <div id="map" class></div>
+                        </center>
+                    </div>
+                    <div class="col-xl-3 col-lg-12" style="background:rgba(0, 0, 0, 0.10)">
+                        <a id="btn_modal_urunbilgi" type="button" class="nav-link text-dark p-1 pull-right d-none" data-bs-toggle="modal" data-bs-target="#modal_urunbilgi"
+                            style="color:white;">
+                            Bilgi Ekle
+                        </a>
+                        <h4>&nbsp;</h4>
+                        <div id="div_urun_bilgi" class="text-muted pt-1" style="font-size:9pt;">
+                            &nbsp;
+                        </div>
+                        <div id="div_urun_bilgi_2" class="text-muted pt-3">
+                            &nbsp;
+                        </div>
+                    </div>
+                </div>
+                <small class="text-muted pull-leftx d-nonex">TUİK Bitkisel Üretim İstatistikleri,2020</small>
+                <hr/>
+
+
+                <!-- il ve ürün butonları -->
+                <div class="row">
+                    <div class="col-md-5">İl Bazında Arama</div>
+                    <div class="col-md-7">Ürün Bazında Arama</div>
+                </div>
+                <div class="row">
+                    <div class="col-md-5">
+                        <!-- il butonları -->
+                        <div class="row text-center mb-2 p-0">
+                            <div id="div_buttons" class="">
+                                <select name="sel_iller" id="sel_iller" class="form-select pull-left mr-0" style="width:40%;">
+                                </select>
+                                <button id="btn_yetisen_goster" type="button" class="btn btn-info btn-il-a" >İlde Yetişen </button>
+                                <button id="btn_tahmin_goster" type="button" class="btn btn-info btn-il-b"> İlde Yetişebilecek</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-7 pb-1">
+                        <div class="row">
+                            <!-- ürün butonları -->
+                            <div class="col-md-2 px-1">
+                                <select name="sel_urun_tipi_u" id="sel_urun_tipi_u" class="form-select mb-2">
+                                    <option>Seçiniz</option>
+                                    <option value='Meyveler'>Meyveler</option>
+                                    <option value='Sebzeler'>Sebzeler</option>
+                                    <option value='Tahıllar'>Tahıllar</option>
+                                    <option value='Süs Bitkileri'>Süs Bitkileri</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2 px-1">
+                                <select name="sel_urun_adi_u" id="sel_urun_adi_u" class="form-select mb-2">
+                                </select>
+                            </div>
+                            <div class="col-md-2 p-0">
+                                <select name="sel_urun_verim_limit" id="sel_urun_verim_limit" class="form-select mb-2" style="width:90px;">
+                                    <option value='0.00'>%0</option>
+                                    <option value='0.10'>%10</option>
+                                    <option value='0.20'>%20</option>
+                                    <option value='0.30'>%30</option>
+                                    <option value='0.40'>%40</option>
+                                    <option value='0.50' selected>%50</option>
+                                    <option value='0.60'>%60</option>
+                                    <option value='0.70'>%70</option>
+                                    <option value='0.80'>%80</option>
+                                    <option value='0.90'>%90</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 p-0">
+                                <button class="btn btn-info px-4 btn-il-a" id="btn_hm_urun_sec_u">Yetişen İller</button>
+                                <button class="btn btn-info px-4 btn-il-b" id="btn_hm_urun_sec_t"
+                                    style="background:rgb(21,162,195);">Tahmin İller</button>
+                                <button id="btn_il_detay" type="button" class="btn btn-primary "> İlçe Detay </button>
+                            </div>
+                            <!-- ürünün yetiştiği il istatistikleri-->
+                        </div>
+                    </div>
+                </div>
+                <hr />
+                
+                <!-- il paneli -->
+                <div class="row d-none" id="div_il_panel">
+                    <div class="row">
+                        <!-- Meyveler -->
+                        <div class="col-sm-6 mb-3">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title">Meyveler Içecek Ve Baharat Bitkileri</h5>
+                                </div>
+                                <div class="card-body" id="meyveler"></div>
+                            </div>
+                        </div>
+                        <!-- Tahıllar -->
+                        <div class="col-sm-6 mb-3">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title">Tahıllar Ve Diğer Bitkisel Ürünler</h5>
+                                </div>
+                                <div class="card-body" id="tahillar"></div>
+                            </div>
+                        </div>
+                        <!-- Sebzeler -->
+                        <div class="col-sm-6 mb-3">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title">Sebzeler</h5>
+                                </div>
+                                <div class="card-body" id="sebzeler"></div>
+                            </div>
+                        </div>
+                        <!-- Süs Bitkileri -->
+                        <div class="col-sm-6 mb-3">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title">Süs Bitkileri</h5>
+                                </div>
+                                <div class="card-body" id="susbitkileri"></div>
+                            </div>
+                        </div>
+                    </div>                    
+                </div>
+
+                <!-- il detay paneli-->
+                <div class="row d-none" id="div_detay_panel">
+                    &nbsp;
+                </div>
+
+                <!-- ürün paneli-->
+                <div class="row d-none" id="div_urun_panel" >
+                    <div class="col-md-8 offset-md-0" id="div_urun_hm_stats">
+                        .
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col text-center">
+                        <hr/>
+                        <button id="btn_modal" type="button" class="btn btn-warning col-md-2" data-bs-toggle="modal" 
+                                data-bs-target="#modal_game2" style="color:white;">
+                            Oyna
+                        </button>
+                    </div>
+                </div>
+                <hr/>
+
+                
+            </div>
+        </section>        
+            
+        <!-- Modal - Ürün Bilgi Ekle -->
+        <div class="modal fade" id="modal_urunbilgi" data-bs-backdrop="static" data-bs-keyboard="true" tabindex="-1"
+            aria-labelledby="staticBackdropLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centeredx modal-md">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="staticBackdropLabel">Ürün Bilgisi Ekleme</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row form">
+                            <div class="form-group">
+                                <label for="urun_bilgi_urunadi">Ürün Adı</label>
+                                <input id="urun_bilgi_urunadi" name="urun_bilgi_urunadi" class="form-control col-md-6"/>
+                            </div>  
+                            <div class="form-group">
+                                <label for="urun_bilgi_urunaciklama">Ürün Açıklama</label>
+                                <textarea id="urun_bilgi_urunaciklama" name="urun_bilgi_urunaciklama" class="form-control"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-info text-white" id="btn_urun_bilgi_kaydet"
+                            style="background:#44a1c1; border-color:#4481b1">Kaydet</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Kapat</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- / Modal - Tahmin Oyunu -->
+
+        <!-- Modal - Tahmin Oyunu I -->
+        <div class="modal fade" id="modal_game" data-bs-backdrop="static" data-bs-keyboard="true" tabindex="-1"
+            aria-labelledby="staticBackdropLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centeredx modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="staticBackdropLabel">Tahmin Et</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-header">
+                        <span><strong id='span_selected_il' style="color:#44a1c1">&nbsp;</strong>
+                            ilinde hangi ürünlerin yetiştiğini tahmin et, puan kazan.<br />
+                            Yetiştirilmeyen ama yetişme ihtimali olan ürünleri bul iki kat puan kazan
+                        </span>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row ">
+                            <div class="col-md-6">
+                                <select name="sel_urun_tipi" id="sel_urun_tipi" class="form-select mb-2">
+                                    <option>Seçiniz</option>
+                                    <option value='Meyveler'>Meyveler</option>
+                                    <option value='Sebzeler'>Sebzeler</option>
+                                    <option value='Tahıllar'>Tahıllar</option>
+                                    <option value='Süs Bitkileri'>Süs Bitkileri</option>
+                                </select>
+                                <select name="sel_urun_adi" id="sel_urun_adi" class="form-select mb-2">
+                                </select>
+                                <button class="btn btn-info px-4 text-white pull-right" id="btn_tahmin_urun_ekle">Ekle</button>
+                            </div>
+                            <div class="col-md-6">
+                                <div id="div_tahmin"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-info text-white" id="btn_tahmin_et"
+                            style="background:#44a1c1; border-color:#4481b1">Tahmin Et</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Kapat</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- / Modal - Tahmin Oyunu -->
+
+        <!-- Modal - Tahmin Oyunu II -->
+        <div class="modal fade" id="modal_game2" data-bs-backdrop="static" data-bs-keyboard="true" tabindex="-1"
+            aria-labelledby="staticBackdropLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centeredx modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="staticBackdropLabel">Tahmin Et</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-header">
+                        <span><strong id='span_selected_il' style="color:#44a1c1">&nbsp;</strong>
+                            ilinde hangi ürünlerin yetiştiğini tahmin et, puan kazan.<br />
+                        </span>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div id="div_oyun2_liste1" class="col-md-12 border-bottom border p-3 text-center"
+                                ondrop="drop(event)" ondragover="allowDrop(event)" style="min-height:200px;">
+                                &nbsp;
+                            </div>
+                            <div class="col-md-6" ondrop="drop(event)" ondragover="allowDrop(event)" style="min-height:80px;">
+                                <span>Yetişir</span>
+                                <div id="div_oyun2_liste2" class="border m-2 p-2" style="min-height:120px;">&nbsp;</div>
+                            </div>
+                            <div class="col-md-6" ondrop="drop(event)" ondragover="allowDrop(event)">
+                                <span>Yetişmez</span>
+                                <div id="div_oyun2_liste3" class="border m-2 p-2" style="min-height:120px;">&nbsp;</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-info text-white" id="btn_tahmin_et"
+                            style="background:#44a1c1; border-color:#4481b1">Kontrol Et</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Kapat</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- / Modal - Tahmin Oyunu -->
+
+    </body>
+
+    <!-- confetti scripti -->
+    <script src="static/js/confetti.min.js"></script>
+    
+    <!-- document ve yardımcı fonksiyonlar -->
+    <script>
+        
+        meyva_a = []
+        click_path = []
+        urunler = []
+        iller = []
+        function rescale(e, a1,b1, a2,b2, p){
+            if(p>0){
+                return a2+(b2-a2)*((e-a1)/(b1-a1))
+            } else {
+                return a2-(a2-b2)*((e-a1)/(b1-a1))
+            }
+        }
+        
+        
+        // doküman yüklemese tamamlandığında yapılacak işler
+        // test otomasyon
+        $(document).ready(function(){
+            //console.log('ready');
+            $.getJSON('get_urunler', {}, function(data){ urunler=data.urunler; })
+            $.getJSON('get_iller', {}, function(data){ 
+                $('#sel_iller').html(data.iller)
+                .prepend($("<option value=' '>İl Seçiniz</option>"))
+                .val('')
+                .change(function(){ 
+                    $('title:contains("'+$(this).val()+'")').parent().trigger('click');
+                })
+                ; 
+            })
+            .error(function(jqXHR, textStatus, err){alert('error:'+err); console.log(err);});
+            
+            //test_automate()
+            //test_automate_urun();
+            il_goster('Antalya','a');
+            //setTimeout(function(){urun_goster('Fındık','a');}, 200)
+            //setTimeout(function(){ $('#btn_modal').click(); } ,800);
+        })
+        
+        document.onkeydown = function(evt) {
+            evt = evt || window.event;
+            
+            //Ctrl+T: test automate
+            if (evt.ctrlKey && evt.keyCode == 84) { test_automate() } 
+            
+            //Ctrl+U: test ürün heatmap
+            if (evt.ctrlKey && evt.keyCode == 85) { test_automate_urun(); } 
+            
+            //Ctrl+C: confetti test
+            if (evt.ctrlKey && evt.keyCode == 67) { 
+                confetti.start()
+                setTimeout(function(){confetti.stop();},5000)
+            }
+        };        
+        
+        function test_automate(){
+            // test automate
+            $('#antalya').click();
+            setTimeout(function(){
+                $('#btn_modal').click();
+                $("#sel_urun_tipi").val($("#sel_urun_tipi option:eq(1)").val());
+                setTimeout(function(){
+                    $("#sel_urun_tipi").trigger('change');
+                    $("#sel_urun_adi").val($("#sel_urun_adi option:eq(2)").val())
+                    $('#btn_tahmin_urun_ekle').click();
+                    $("#sel_urun_adi").val($("#sel_urun_adi option:eq(3)").val())
+                    $('#btn_tahmin_urun_ekle').click();
+                    $("#sel_urun_adi").val($("#sel_urun_adi option:eq(4)").val())
+                    $('#btn_tahmin_urun_ekle').click();
+                    
+                    $("#sel_urun_tipi").val($("#sel_urun_tipi option:eq(4)").val());
+                    $("#sel_urun_tipi").trigger('change');
+                    setTimeout(function(){
+                        $("#sel_urun_adi").val($("#sel_urun_adi option:eq(13)").val())
+                        $('#btn_tahmin_urun_ekle').click();
+                    }, 200);
+                }, 200);
+            }, 200);
+        }
+        
+        function test_automate_urun(){
+            //var myModal = new bootstrap.Modal(document.getElementById('modal_urun'), {keyboard: false});
+            //myModal.toggle();
+            setTimeout(function(){
+                $('#btn_modal_urun').click();
+                $("#sel_urun_tipi_u").val($("#sel_urun_tipi_u option:eq(1)").val());
+                setTimeout(function(){
+                    $("#sel_urun_tipi_u").trigger('change');
+                    $("#sel_urun_adi_u").val($("#sel_urun_adi_u option:eq(3)").val())
+                    $('#btn_hm_urun_sec_u').click();
+                }, 200);
+            },200);
+        }
+        
+    </script>
+
+    <!-- il gösterme -->
+    <script>
+        // haritaya tıklama sonrasında servisten gelen ürünler için progress bar oluşturma
+        function pbar(t){
+            pb2 = $(`
+                <div class='row' style="font-size:9pt;">
+                <div class="col-md-4">
+                    <p class="pull-left media-name" style='height:15px; overflow:hidden;'>
+                        <a class='nav-link p-0 il_urun'>`+t[0]+`</a>
+                    </p>
+                </div>
+
+                <div style="font-size:8pt;" class="col-md-6 d_yetisen d-none">
+                    <span class="progress-label">`+t[1]+` ilçede</span>
+                    <span class="pull-right"> verim: `+parseInt(parseFloat(t[3])*100)+`%</span>
+
+                    <div class="progress">
+                        <div class="progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" 
+                            style="width:`+parseInt(parseFloat(t[3])*100)+`%;background:rgb(21,162,195) !important">
+                        </div>
+                    </div>
+                </div>
+
+                <div style="font-size:8pt;" class="col-md-6 d_tahmin d-none">
+                    <span class="progress-label">`+t[4]+` ilçede</span>
+                    <span class="pull-right">`+parseInt(parseFloat(t[5])*100)+`%</span>
+
+                    <div class="progress">
+                        <div class="progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" 
+                            style="width:`+parseInt(parseFloat(t[5])*100)+`%;background:rgb(21,192,225) !important">
+                        </div>
+                    </div>
+                </div>
+        
+                </div>
+            `)          
+            return pb2
+        }
+        
+        function il_goster(il_adi, mode){
+            // il_adi: Büyük harfle başlayan türkçe karakterli gerçek il adını kabul eder
+            // mode: a (yetişen) veya b (tahmin) kabul eder, varsayılan değer a'dır.
+            //$('#div_urun_bilgi').text('...');
+            $.getJSON(
+                "getil", 
+                 {il:il_adi, mode: mode },
+                 function( data ) {
+                     $('#sel_iller').val(il_adi);
+                     $('#div_il_panel').removeClass('d-none');
+                     $('#div_detay_panel').addClass('d-none');
+                     $('#div_urun_panel').addClass('d-none');
+
+                     //console.log(il_adi);
+                     $("#meyveler").empty(); 
+                     $.each(data.meyveler, function(m,t){ $("#meyveler").append(pbar(t)); })
+                     $("#sebzeler").empty(); 
+                     $.each(data.sebzeler, function(m,t){ $("#sebzeler").append(pbar(t)); })
+                     $("#tahillar").empty(); 
+                     $.each(data.tahillar, function(m,t){ $("#tahillar").append(pbar(t)); })
+                     $("#susbitkileri").empty(); 
+                     $.each(data.susbitkileri, function(m,t){ $("#susbitkileri").append(pbar(t)); })
+
+                     $('#btn_modal').removeClass('d-none');
+                     $("#div_title").html(data.ret);
+                     $('.il_urun').click(function(){ urun_goster($(this).text(),'a'); })
+                     
+                     
+                     if(mode=='a'){
+                        $('.d_yetisen').removeClass('d-none');
+                     } else{
+                        $('.d_tahmin').removeClass('d-none');
+                     }
+                 }
+            ).error(function(jqXHR, textStatus, err){
+                alert('error:'+err); console.log(err);
+            });            
+        }               
+        
+        function il_detay(il_adi, urun_adi){
+            console.log(il_adi, urun_adi)
+            $.getJSON(
+                'il_detay', {il: il_adi, urun: urun_adi}, function(data){
+                    $('#div_il_panel').addClass('d-none');
+                    $('#div_detay_panel').empty().removeClass('d-none').html($(data.tablo2).addClass('dataframe mystyle'))
+                    $('#div_urun_panel').addClass('d-none');
+                }
+            )
+        }
+
+        // haritaya tıklama fonksiyonu
+        $(function(){
+            $("#map svg path").click(
+              function() {
+                  $('svg path').attr('fill','rgb(68, 68, 85)'); 
+                var id=$(this).attr("id");
+                var name=$(this)[0].title;
+                $("#div_title").html(name);
+                $('#div_detay_panel').addClass('d-none');
+                $("#div_il_panel").removeClass('d-none');
+                $('#div_urun_panel').addClass('d-none');
+                il_goster($("#div_title").text(), 'a')
+             });
+        })
+        
+        // Ne Yetişir butonu
+        $('#btn_yetisen_goster').click(function(){
+            il_goster($("#div_title").text(), 'a');
+        })
+
+        // Ne Yetişebilir butonu
+        $('#btn_tahmin_goster').click(function(){
+            il_goster($("#div_title").text(), 'b');
+        })
+        
+        // Detay butonu
+        $('#btn_il_detay').click(function(){
+            il_detay($("#sel_iller").val(), $('#sel_urun_adi_u').val());
+        })
+        
+    </script>
+
+    <!-- ürün heat map -->
+    <script>
+        // *********** Ürün Heatmap *************************************************** //
+        hm_urunler = [] // list for heatmap
+        hm_ozet = [] // haritanın sağındaki özet bilgi ekranı için
+
+        function urun_goster(urun_adi, mode){
+            // urun: Türkçe karakterli tam ürün adı
+            // mode: a (yetişen) veya b (tahmin) kabul eder.
+            $('#div_title').text(urun_adi);
+            $('#div_urun_bilgi').text(',');
+            
+            // eğer fonksiyon dropdown menüden çağrılmadıysa dropdownları güncelle
+            if($('#sel_urun_adi_u').val()!=urun_adi){
+                urun_tipi = $.map(urunler, function(i,e){ if(i.includes(urun_adi))return e;})[0]
+                $('#sel_urun_tipi_u').val(urun_tipi);
+                $("#sel_urun_tipi_u").trigger('change');
+                setTimeout(function(){
+                    $('#sel_urun_adi_u').val(urun_adi);
+                }, 200)
+            }
+            
+            $.ajax({
+                url: 'urun_heatmap',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({urun: urun_adi}),
+                success: function(data){ 
+                    $('#div_urun_panel').removeClass('d-none');
+                    $('#div_detay_panel').addClass('d-none');
+                    $('#div_il_panel').addClass('d-none');
+                    sel_urun_verim_limit = parseFloat($('#sel_urun_verim_limit').val());
+
+                    hm_urunler = data.urunler;
+                    hm_ozet = data.ozet;
+                    $.each(hm_urunler, function(i,e){ 
+                        path = $('title:contains("'+i+'")').parent();
+                        path.attr('fill','rgb(68, 68, 85)');                      
+
+                        if((mode=='a') || (mode=='b')){
+                            if(e.miktar>0 & e.verim_a>sel_urun_verim_limit){ 
+                                a = parseInt(100* rescale(e.verim_a, 0,1, 0.2,1, 1) )/100;
+                                r = parseInt(rescale(e.verim_a, 0,1,  10, 30, -1));
+                                g = parseInt(rescale(e.verim_a, 0,1,  80,150, -1));
+                                b = parseInt(rescale(e.verim_a, 0,1, 160,190, -1));
+                                //console.log('g: '+a);
+                                path.attr('fill',
+                                          'rgba('+r+','+g+','+b+','+ a +')'
+                                         );
+                            } 
+                        } 
+                        if(mode=='b') {
+                            if(e.miktar==0 & e.verim_b>sel_urun_verim_limit){ 
+                                a = parseInt(100* rescale(e.verim_b, 0,1, 0.2,1, 1) )/100;
+                                r = parseInt(rescale(e.verim_a, 0,1,  10, 30, -1));
+                                g = parseInt(rescale(e.verim_a, 0,1,  160, 190, -1));
+                                b = parseInt(rescale(e.verim_a, 0,1,  80, 150, -1));
+                                //console.log('i:',i+'v:'+e.verim_b+ '\tt: '+r+','+g+','+b+','+a);
+                                path.attr('fill', 'rgba('+ r +','+g+','+b+','+a+')');
+                            } 
+                        }
+                    });
+
+                    // ürünler özet bilgileri göster, haritanın sağında
+                    $('#div_urun_bilgi').parent().find('h4').text(hm_ozet[0][2]);
+                    $('#div_urun_bilgi_2').css('font-size','9pt').css('padding','5px').html(`
+                        <div class="row" style="font-weight:bold; border-bottom:2px solid #fff;">
+                            <div style="width:100px; overflow:hidden">İl Adı</div>
+                            <div style="width:50px; overflow:hidden; border-left:1px solid #fff;padding-left:1px;">Yetişen İlçe</div>
+                            <div style="width:60px; overflow:hidden; border-left:1px solid #fff;padding-left:2px;">Mevcut Verim</div>
+                            <div style="width:50px; overflow:hidden; border-left:1px solid #fff;padding-left:1px;">Tahmin İlçe</div>
+                            <div style="width:50px; overflow:hidden; border-left:1px solid #fff;padding-left:2px;">Tahmin Verim</div>
+                        </div>
+                    `);
+                    $.each(hm_ozet.slice(0,15), function(i,e){
+                        //console.log(e);
+                        il_urun_bilgi = $(`
+                            <div class="row" style="padding: 2px 1px 2px 1px !important; padding-left:0px !important;">
+                                <div style="width:100px; overflow:hidden"><a class="nav-link p-0 urun-bilgi-il">`+e[0]+`</a></div>
+                                <div style="width:50px; overflow:hidden; border-left:1px solid #fff;">`+e[3]+`</div>
+                                <div style="width:60px; overflow:hidden; border-left:1px solid #fff;">%`+parseInt(e[5]*100)+`</div>
+                                <div style="width:50px; overflow:hidden; border-left:1px solid #fff;">`+e[6]+`</div>
+                                <div style="width:50px; overflow:hidden; border-left:1px solid #fff;">%`+parseInt(e[7]*100)+`</div>
+                            </div>
+                        `)
+                        $('#div_urun_bilgi_2').append(il_urun_bilgi);
+                        $('.urun-bilgi-il').click(function(){ il_detay($(this).text(), $('#div_urun_bilgi').parent().find('h4').text()) })
+                        $('#div_urun_bilgi_2').find('.row:odd').css('background','#ffffffc0')
+                        $('#div_urun_bilgi_2').find('.row:odd').css('background','#eeeeeec0')
+                    })
+                    //console.log(data); 
+                },
+                error:  function(r,s,e){ alert(e); },
+            });
+
+            $.ajax({
+                url: 'urun_bilgi_oku',
+                data: { urun: urun_adi },
+                success: function(data){ $('#div_urun_bilgi').text(data.ret); },
+                error: function(r,s,e){alert(e);}
+            })
+
+        }
+        
+        
+        // Ürün tipi değiştiğinde ürün adlarını günceller
+        $("#sel_urun_tipi_u").change(function(){
+            $('#sel_urun_adi_u').empty().append($('<option/>', { 
+                    value: '', text : 'Seçiniz'
+                }));
+            urun_tipi = $("#sel_urun_tipi_u").val()
+            sel_urunler = urunler[urun_tipi]
+            $.each(sel_urunler, function (index, value) {
+                $('#sel_urun_adi_u').append($('<option/>', { 
+                    value: value, text : value 
+                }));
+            }); 
+            //console.log('urun_adi populated')
+        })
+
+        // Ürün adı değiştiğinde ürün panelinde yetişen ürünleri göster
+        $('#sel_urun_adi_u').change(function(){
+            $('#btn_hm_urun_sec_u').trigger('click');
+        })
+        
+        // Heatmap için ürün seçip istatistiklerini gösterir, hm_goster butonu ise ile haritada gösterir
+        $('#btn_hm_urun_sec_u').click(function(){
+            if($('#sel_urun_adi_u').val()){
+                urun_adi = $('#sel_urun_adi_u').val();
+                urun_goster(urun_adi, 'a');
+            }
+        })
+        
+        // Heatmap için ürün seçip istatistiklerini gösterir, hm_goster butonu ise ile haritada gösterir
+        $('#btn_hm_urun_sec_t').click(function(){
+            if($('#sel_urun_adi_u').val()){
+                urun_adi = $('#sel_urun_adi_u').val();
+                urun_goster(urun_adi, 'b');
+            }
+        })
+        
+        // Ürün bilgi ekleme penceresini açar
+        $('#btn_modal_urunbilgi').click(function(){
+            $('#urun_bilgi_urunadi').val($('#sel_urun_adi_u').val());
+            $('#urun_bilgi_urunaciklama').val('');
+        })
+
+        // Ürün bilgisi ekle
+        $('#btn_urun_bilgi_kaydet').click(function(){
+            $.ajax({
+                url: 'urun_bilgi_ekle',
+                data: {
+                    urun: $('#urun_bilgi_urunadi').val(), 
+                    bilgi: $('#urun_bilgi_urunaciklama').val()
+                },
+                success: function(data){ if(data.ret=='ok'){ $('#modal_urunbilgi').find('.btn-secondary').click(); } },
+                error: function(r,s,e){alert(e);}
+            })
+        })
+        
+        // *********** Ürün Heatmap *************************************************** //
+    </script>
+
+
+    <!-- tahmin oyunu I - drag&drop kodları -->
+    <script>
+        // dra and drop 
+        function allowDrop(ev) {
+          ev.preventDefault();
+        }
+        
+        function drag(ev) {
+          ev.dataTransfer.setData("text", ev.target.id);
+        }
+        
+        function drop(ev) {
+          ev.preventDefault();
+          var data = ev.dataTransfer.getData("text");
+          ev.target.appendChild(document.getElementById(data));
+        }
+
+        function noAllowDrop(ev) {
+            ev.stopPropagation();
+        }        
+    </script>
+
+    <!-- tahmin oyunu I -->
+    <script>
+        // *********** Tahmin Oyunu *************************************************** //
+        
+        // Tahmin penceresini gösterir
+        $('#btn_modal').click(function(){
+            il = $('#sel_iller').val();
+            if(il==' '){
+                alert("Lütfen önce bir il seçiniz");
+                setTimeout(function(){ $('#modal_game').modal('hide'); }, 500);
+            }else {
+                $('#span_selected_il').text(il);
+                $('#div_tahmin').empty();
+                $("#sel_urun_adi").empty();
+                $("#sel_urun_tipi").val($("#sel_urun_tipi option:first").val());
+            }
+        })
+        
+        // Ürün tipi değiştiğinde ürün adlarını günceller
+        $("#sel_urun_tipi").change(function(){
+            $('#sel_urun_adi').empty().append($('<option/>', { 
+                    value: '', text : 'Seçiniz'
+                }));
+            urun_tipi = $("#sel_urun_tipi").val()
+            sel_urunler = urunler[urun_tipi]
+            $.each(sel_urunler, function (index, value) {
+                $('#sel_urun_adi').append($('<option/>', { 
+                    value: value, text : value 
+                }));
+            }); 
+            //console.log('urun_adi populated')
+        })
+        
+        // Tahmin etmek için ürün ekler 
+        $('#btn_tahmin_urun_ekle').click(function(){
+            if($('#sel_urun_adi').val()){
+                urun_adi = $('#sel_urun_adi').val();
+                $('div.alert:contains("'+urun_adi+'")').remove();
+                alert = $(
+                    `<div class="alert alert-info alert-dismissible fade show p-2 mt-1 mb-2" role="alert">
+                      <div>`+urun_adi+`</div>
+                      <button type="button" class="btn-close p-2 m-1" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>`)
+                $('#div_tahmin').append(alert)
+                
+            }
+        })
+        
+        // Tahmin edilen ürünlerin değerlerini çekip skoru hesaplar
+        $('#btn_tahmin_et').click(function(){
+            il = $('#div_title').text();
+            secili_urunler = $('#div_tahmin .alert').map(function(i,v){ return $(v).text().trim(); }).get();
+            //console.log('secili_urunler:');
+            //console.log(secili_urunler);
+            $.ajax({
+                url: 'tahminet',
+                type: "POST",
+                contentType: 'application/json',
+                dataType: 'json',
+                data: JSON.stringify({
+                    il:il,
+                    urunler: secili_urunler
+                }),
+                traditional: true,
+                success: function(data){
+                    //console.log('secili_urunler.success');
+                    tahmin_urunler = data.urunler;
+                    //console.log(data);
+                    $.each(tahmin_urunler, 
+                           function(i,e){ 
+                                //console.log(e);
+                                pbar_tmp = `
+                                <div style="font-size:8pt;" class="col-md-11">
+                                    <div style="font-size: 1rem;border-bottom:1px solid #65a1b0; margin-bottom:7px;">`+i+`</div>
+                                    <span class="progress-label">`+e.ilçe_a+` ilçede yetişiyor</span>
+                                    <span class="pull-right">`+parseInt(e.verim_a*100)+`%</span>
+                                    <div class="progress">
+                                        <div class="progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" 
+                                            style="width:`+parseInt((e.verim_a || 0)*100)+`%;background:rgba(211,212,205,0.8) !important">
+                                        </div>
+                                    </div>
+                                    <span class="progress-label">`+e.ilçe_b+` ilçede yetişebilir</span>
+                                    <span class="pull-right">`+parseInt(e.verim_b*100)+`%</span>
+                                    <div class="progress">
+                                        <div class="progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" 
+                                            style="width:`+parseInt((e.verim_b || 0)*100)+`%;background:rgb(41,182,215) !important">
+                                        </div>
+                                    </div>
+                                </div>
+                                `
+                                $("div .alert:contains('"+i+"')").find('div:eq(0)').html(pbar_tmp); 
+                            }
+                    );
+                    
+                    confetti.start()
+                    setTimeout(function(){confetti.stop();},5000)
+                    //console.log(data.urunler);
+                },
+                error: function (request, status, error) {
+                    console.log(error);
+                }                
+            });
+        })
+        
+        // *********** Tahmin Oyunu *************************************************** //
+        
+    </script>
+
+    <script>
+    // tahmin oyunu II
+        // Tahmin penceresini gösterir
+        $('#btn_modal').click(function(){
+            il = $('#sel_iller').val();
+            if(il==' '){
+                alert("Lütfen önce bir il seçiniz");
+                setTimeout(function(){ $('#modal_game2').modal('hide'); }, 500);
+            }else {
+                oyun2_urun_ekle();
+            }
+        })
+
+        // Tahmin etmek için ürün ekler 
+        function oyun2_urun_ekle(){
+            $('#modal_game2 .modal-header strong').text(il);
+            $('#div_oyun2_liste1').empty();
+            $('#div_oyun2_liste2').empty();
+            $('#div_oyun2_liste3').empty();
+
+            $.ajax({
+                url: 'tahmin_urun_al',
+                type:'POST',
+                contentType: 'application/json',
+                dataType:'json',
+                data: JSON.stringify({il:il}),
+                traditional: true,
+                success: function(data){
+                    tahmin_urunler = data.urunler;
+                    $.each(tahmin_urunler,
+                        function(i,e){
+                            urun = $(
+                                    `<span id="`+i+`" class="badge bg-secondary p-3 m-2" style="width:150px;" draggable="true" 
+                                            ondragstart="drag(event)" ondragover="noAllowDrop(event)"
+                                            data_miktar="`+e.miktar+`" data_uretim_sira="`+e.Uretim_Sira+`" data_verim_sira="`+e.Verim_Sira+`"
+                                            title="`+e.miktar+`" 
+                                        >
+                                    `+e.Urun_Adi+`
+                                    </span>`)
+                            //urun = $('<img id="drag1" src="https://www.w3schools.com/html/img_logo.gif" draggable="true" ondragstart="drag(event)" width="336" height="69" style="min-height:80px;">')
+                            $('#div_oyun2_liste1').append(urun)
+                        }
+                    );
+                },
+                error: function (request, status, error) {
+                    console.log(error);
+                }                
+
+            });
+        }
+
+        $('#modal_game2 .btn-info').click(function(){
+            adet = 0
+            puan = 0;
+            $.each($('#div_oyun2_liste2 span'), 
+                    function(i,e){ 
+                        if(parseInt($(e).attr('data_miktar'))>0){
+                            $(e).removeClass("bg-secondary bg-success bg-danger").addClass("bg-success");
+                        } else{
+                            $(e).removeClass("bg-secondary bg-success bg-danger").addClass("bg-danger");
+                        }
+                    }
+            );
+            $.each($('#div_oyun2_liste3 span'), 
+                    function(i,e){ 
+                        if(parseInt($(e).attr('data_miktar'))==0){
+                            $(e).removeClass("bg-secondary bg-success bg-danger").addClass("bg-success");
+                        } else{
+                            $(e).removeClass("bg-secondary bg-success bg-danger").addClass("bg-danger");
+                        }
+                    }
+            );
+            adet = $('#modal_game2 .badge').length;
+            puan = $('#modal_game2 .badge.bg-success').length - $('#modal_game2 .badge.bg-danger').length/3;
+            skor = parseInt(1000 * puan / adet);
+            span_skor = $(`<span class="oyun-skor text-center `+(skor>500?'text-success':'text-danger')+`" style="font-size: 7vw;">`+skor+`</span>`);
+            $('#div_oyun2_liste1').empty().append(span_skor);
+            if(skor>500){
+                confetti.start()
+                setTimeout(function(){confetti.stop();},5000)
+            }
+        })
+
+    </script>
+
+</html>

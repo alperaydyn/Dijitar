@@ -1,0 +1,1 @@
+source /home/aydialco/virtualenv/_dijitar/3.9/bin/activate && cd /home/aydialco/_dijitar

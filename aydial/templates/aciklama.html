@@ -1,0 +1,81 @@
+
+<!DOCTYPE HTML>
+<html lang="en-US">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=0.4, user-scalable=yes" >
+        <title>Bitkisel Üretim Tahmin Uygulaması</title>
+
+        <link rel="stylesheet" type="text/css" href="static/css/normalize.css">
+        <link rel="stylesheet" type="text/css" href="static/css/jquery.qtip.min.css">
+        <link rel="stylesheet" type="text/css" href="static/css/bootstrap.min.css" >
+        <link rel="stylesheet" type="text/css" href="static/css/style1.css" >
+
+        <script type="text/javascript" src="static/js/jquery-1.8.0.min.js"></script>
+        <script type="text/javascript" src="static/js/raphael-min.js"></script>
+        <script type="text/javascript" src="static/js/paths.js"></script>
+        <script type="text/javascript" src="static/js/turkiye.js?v=123"></script>
+        <script type="text/javascript" src="static/js/jquery.qtip.min.js"></script>
+        <script type="text/javascript" src="static/js/bootstrap.bundle.min.js"></script>
+    </head>
+
+    <body>
+        <section id="hero" class="d-flex">
+            <div class="container position-relative">
+                <!-- main caption -->
+                <div class="row justify-content-center mt-3" >
+                    <div class="col-xl-7 col-md-12 text-center">
+                    <h1>İller Bazında Bitkisel Üretim Hacimleri </h1>
+                     <h2>ve Verimlilik Tahminler</h2>
+                    </div>
+                    <a href='/dijitar'>Harita</a>
+                </div>
+                
+                <!-- map and title -->
+                <hr/>
+                <div class="row">
+                    <span class="h3">1. Veri Kaynağı</span><p/>
+                    <span>Veriler TUİK'e ait veri portalı olan <a href='https://biruni.tuik.gov.tr/medas/?kn=92&locale=tr'>Bitkisel Üretim İstatistikleri</a> veri tabanından elde edilmiştir.</span><p />
+                    <img src='static/img/aciklama_verikaynagi.png' style='width:800px'/><p/>
+                    Veritabanında yer alan aşağıdaki kategorilere ait veriler excel formatında indirilmiştir;
+                    <ul>
+                        <li>Tahıllar ve diğer bitkisel ürünler</li>
+                        <li>Sebzeler</li>
+                        <li>Meyveler içecek ve baharat bitkileri</li>
+                        <li>Süs Bitkileri</li>
+                    </ul>
+                    <p/> Örtü altı üretim kategorileri kapsam dışında bırakılmıştır.
+                </div>
+                <div class="row">
+                    <span class="h3">2. Veri Hazırlığı</span><p/>
+                    <span>Excel formatında indirilen veriler birleştirilerek aşağıdaki işlemler uygulanmıştır;</span><p/>
+                    <ul>
+                        <li><b>a. Çoklayan kayıtların silinmesi</b>: veritabanından gelen kayıtların içerisinde aynı veriye ait birden fazla kayıt silinerek veriler tekilleştirilmiştir.</li>
+                        <li><b>b. Eksik verilerin tamamlanması</b>: Üretim miktarı ve üretim alanı olup verimlilik bilgisi gelmeyen kayıtlar için bu bilgi miktar/alan oranı ile doldurulmuştur.</li>
+                        <li><b>c. Eksik verilerin silinmesi</b>: Verim oranı sıfır olan kayıtlar tablodan silinmiştir.</li>
+                        <li><b>d. Az miktarda üretilen kayıtların silinmesi</b>: 5'den daha az lokasyonda yetişen 39 adet ürün tablodan silinmiştir.</li>
+                        <li><b>e. Çok yüksek ve çok düşük miktarda yetişen ürünlerin silinmesi</b>: Öneri sisteminin doğru çalışabilmesi için her bir ürün için çok düşük ve çok yüksek değerlere ait kayıtlar tablodan silinmiştir.</li>
+                        <li><b>f. Öneri tablosunun hazırlanması</b>: Temizlik işleminden sonra her bir ilçe için o ilçede üretilen tüm ürünler listelenip en yüksek üretime sahip olan ilçedeki üretim miktarına bölünür. Sonuç olarak her ilçe için verim oranı 0-1 aralığına dönüştürülür.</li>
+                        <li><img src='static/img/aciklama_ilcebenzerlik.png' style='width:800px'/><p/></li>
+                    </ul>
+                </div>
+                <div class="row">
+                    <span class="h3">3. Öneri Algoritması</span><p/>
+                    <span>Bu uygulamada <b>Collaborative Filtering</b> adı verilen ilçelerin ürün benzerliklerinden yola çıkılan öneri algoritması kullanılmıştır. Bu algoritmada benzer ürünler üreten ilçelerin benzerlikleri üzerinden bir ilişki kurularak benzerlik gösteren ilçelerden birisinde yetişen ürünün diğerinde de yetişebileceği tahmin edilmektedir.</span><p/>
+                    <img src='static/img/aciklama_collaborative.png' style='width:350px'/><p/>
+                </div>
+                <div class="row">
+                    <span class="h3">4. Sonuçların Değerlendirilmesi</span><p/>
+                    <span>Tüm veri seti içerisinden 10 bin adet ürün kontrol amaçlı olarak algoritmanın başasının ölçümü için eğitim setinden çıkartılmıştır. Algoritmanın eğitimi sonrasında bu 10 bin kayıt ile algoritmanın tahminleri karşılaştırılarak başarı oranı ölçülmüştir.</span><p/>
+                    <span>Sonuçları incelediğimizde verim oranı artı-eksi %10 aralığındaki tahminlerin %70 olduğunu görüyoruz.</span><p/>
+                    <img src='static/img/aciklama_basariorani.png' style='width:800px'/><p/>
+                </div>
+                
+                <hr/>
+                
+                <center><p/>.<p/>.<p/>.<p/></center>
+                
+            </div>
+        </section>
+    </body>
+</html>
